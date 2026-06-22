@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JobPilot — interactive demo</title>
+<style>
+/* ─────────────────── DESIGN SYSTEM ─────────────────── */
+:root{
+  --accent:#10b981; --accent-ink:#06231a; --accent-soft:rgba(16,185,129,.14);
+  --bg:#0B0B0F; --surface:#131319; --raised:#1A1A22; --hover:#20202a;
+  --border:rgba(255,255,255,.08); --border-strong:rgba(255,255,255,.14);
+  --text:#EDEDF0; --muted:#8b8b96; --faint:#5d5d68;
+  --warn:#f5a623; --danger:#f4496b; --info:#5b8def;
+  --r-sm:6px; --r:10px; --r-lg:16px;
+  --f: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono: ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--f);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow:hidden}
+.tnum{font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
+::selection{background:var(--accent-soft)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#2a2a34;border-radius:6px;border:2px solid var(--bg)}
+
+.app{display:grid;grid-template-columns:232px 1fr;height:100vh}
+.side{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 12px}
+.brand{display:flex;align-items:center;gap:9px;padding:6px 8px 16px;font-weight:700;font-size:16px;letter-spacing:-.01em}
+.brand .mk{width:24px;height:24px;border-radius:7px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
+.nav{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.nav button{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:var(--r);color:var(--muted);font-weight:500;transition:background .15s,color .15s;text-align:left;width:100%}
+.nav button:hover{background:var(--hover);color:var(--text)}
+.nav button.on{background:var(--accent-soft);color:var(--accent)}
+.nav button .ic{width:17px;height:17px;flex:0 0 auto}
+.nav .badge{margin-left:auto;font-size:11px;background:var(--accent);color:var(--accent-ink);border-radius:99px;padding:1px 7px;font-weight:700}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.credit{background:var(--raised);border:1px solid var(--border);border-radius:var(--r);padding:11px 12px}
+.credit .top{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:7px}
+.credit .top b{color:var(--text)}
+.credit .track{height:5px;border-radius:99px;background:#262630;overflow:hidden}
+.credit .fill{height:100%;background:var(--accent);border-radius:99px;transition:width .5s cubic-bezier(.2,0,0,1)}
+.usr{display:flex;align-items:center;gap:9px;padding:7px 6px;border-radius:var(--r);transition:background .15s}.usr:hover{background:var(--hover)}
+.av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#34d399,#0ea5e9);display:grid;place-items:center;font-size:12px;font-weight:700;color:#04120c;flex:0 0 auto}
+.usr .nm{font-size:12.5px;font-weight:600;line-height:1.2}.usr .em{font-size:11px;color:var(--faint)}
+
+.main{display:flex;flex-direction:column;min-width:0}
+.top{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 22px;flex:0 0 auto}
+.top h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:7px 11px;width:300px;color:var(--muted);cursor:text;transition:border-color .15s}
+.search:hover{border-color:var(--border-strong)}
+.search input{background:none;border:none;color:var(--text);outline:none;flex:1;font-size:13px}
+.kbd{font:11px var(--mono);background:#262630;border:1px solid var(--border);border-radius:5px;padding:1px 6px;color:var(--muted)}
+.iconbtn{width:34px;height:34px;border-radius:var(--r);display:grid;place-items:center;color:var(--muted);transition:background .15s,color .15s}.iconbtn:hover{background:var(--hover);color:var(--text)}
+.content{flex:1;overflow:auto;padding:24px 22px 60px}
+
+.head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+.head .sub{color:var(--muted);font-size:13px;margin-top:3px}
+.h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.btn{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:9px 15px;border-radius:var(--r);font-size:13px;transition:transform .12s,filter .15s}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:scale(.97)}
+.btn.ghost{background:var(--raised);color:var(--text);border:1px solid var(--border)}.btn.ghost:hover{background:var(--hover)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.jobs{display:flex;flex-direction:column;gap:9px}
+.job{display:flex;align-items:center;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:15px 18px;cursor:pointer;transition:border-color .15s,background .15s}
+.job:hover{border-color:var(--border-strong);background:#16161d}
+.job.sel{border-color:var(--accent);background:#14201b}
+.score{flex:0 0 auto;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:15px}
+.score.hi{color:var(--accent);background:var(--accent-soft)}
+.score.mid{color:var(--warn);background:rgba(245,166,35,.12)}
+.score.lo{color:var(--faint);background:#1e1e26}
+.job .meta{flex:1;min-width:0}
+.job .t{font-weight:600;font-size:14.5px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job .s{color:var(--muted);font-size:12.5px;margin-top:2px}
+.chip{font-size:11px;font-weight:600;padding:4px 9px;border-radius:99px;white-space:nowrap}
+.chip.src{background:#22222c;color:var(--muted)}
+.chip.best{background:var(--accent-soft);color:var(--accent)}
+
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:min(560px,94vw);background:var(--surface);border-left:1px solid var(--border);transform:translateX(100%);transition:transform .32s cubic-bezier(.2,0,0,1);z-index:41;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.dh{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+.dh .x{margin-left:auto;color:var(--muted)}.dh .x:hover{color:var(--text)}
+.db{padding:20px 22px;overflow:auto;flex:1}
+.df{padding:16px 22px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center}
+.kv{display:flex;gap:8px;font-size:13px;margin-bottom:7px}.kv .k{color:var(--faint);width:78px;flex:0 0 auto}
+.sectionlabel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:700;margin:18px 0 10px}
+.tag{display:inline-block;font-size:12px;background:#22222c;color:var(--muted);border-radius:7px;padding:4px 9px;margin:0 6px 6px 0}
+.tag.have{background:var(--accent-soft);color:var(--accent)}
+
+.pipe{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.pstep{display:flex;align-items:center;gap:12px;background:var(--raised);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;transition:border-color .3s,background .3s}
+.pstep .dot{width:22px;height:22px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;border:2px solid #33333d;color:var(--faint);font-size:11px;font-weight:700;transition:.3s}
+.pstep .pt{font-weight:600;font-size:13.5px}.pstep .pd{font-size:12px;color:var(--muted)}
+.pstep .stat{margin-left:auto;font-size:11.5px;color:var(--faint);font-weight:600}
+.pstep.run{border-color:var(--accent);background:#13211b}
+.pstep.run .dot{border-color:var(--accent);color:var(--accent)}
+.pstep.done .dot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pstep.done .stat{color:var(--accent)}
+.spin{width:13px;height:13px;border:2px solid var(--accent);border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.mailcard{background:var(--raised);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:8px}
+.mailcard .mh{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px}
+.mailcard .mb{padding:14px;font-size:13px;color:#cfcfd6;line-height:1.6;white-space:pre-wrap}
+.scorebar{display:flex;gap:10px;margin-top:10px}
+.metric{flex:1;background:var(--raised);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px}
+.metric .mv{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.metric .ml{font-size:11.5px;color:var(--muted);margin-top:1px}
+
+.sk{background:linear-gradient(90deg,#1a1a22,#23232d,#1a1a22);background-size:200% 100%;animation:shimmer 1.3s infinite;border-radius:8px}
+@keyframes shimmer{to{background-position:-200% 0}}
+.skjob{display:flex;align-items:center;gap:16px;padding:15px 18px;border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:9px}
+
+.empty{text-align:center;padding:70px 20px;color:var(--muted);max-width:420px;margin:0 auto}
+.empty .big{width:54px;height:54px;border-radius:16px;background:var(--raised);border:1px solid var(--border);display:grid;place-items:center;margin:0 auto 16px;color:var(--accent)}
+.empty h3{color:var(--text);font-size:17px;font-weight:600;margin-bottom:6px}
+
+.toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:60}
+.toast{display:flex;align-items:center;gap:10px;background:var(--raised);border:1px solid var(--border-strong);border-radius:var(--r);padding:11px 15px;font-size:13px;font-weight:500;box-shadow:0 12px 40px rgba(0,0,0,.5);animation:tin .3s cubic-bezier(.2,0,0,1)}
+.toast .tk{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}}
+
+.cmd{position:fixed;inset:0;z-index:70;display:grid;place-items:start center;padding-top:14vh;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .18s}
+.cmd.on{opacity:1;pointer-events:auto}
+.cmdbox{width:min(560px,92vw);background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-lg);overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.6);transform:translateY(-8px);transition:transform .18s}
+.cmd.on .cmdbox{transform:none}
+.cmdbox input{width:100%;background:none;border:none;outline:none;color:var(--text);padding:16px 18px;font-size:15px;border-bottom:1px solid var(--border)}
+.cmdlist{padding:6px;max-height:340px;overflow:auto}
+.cmdItem{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--r);color:var(--muted);cursor:pointer}
+.cmdItem.on,.cmdItem:hover{background:var(--accent-soft);color:var(--text)}
+.cmdItem .ic{width:16px;height:16px}
+.cmdItem .hint{margin-left:auto;font-size:11px;color:var(--faint)}
+
+.fade{animation:fade .35s both}@keyframes fade{from{opacity:0;transform:translateY(8px)}}
+@media(max-width:760px){.app{grid-template-columns:1fr}.side{display:none}.search{width:150px}}
+/* ── director (auto walkthrough) ── */
+.cursor{position:fixed;top:0;left:0;width:26px;height:26px;z-index:95;pointer-events:none;opacity:0;transition:transform .85s cubic-bezier(.45,0,.16,1),opacity .35s;filter:drop-shadow(0 3px 6px rgba(0,0,0,.6))}
+.ripple{position:fixed;left:0;top:0;width:40px;height:40px;border-radius:50%;border:2px solid var(--accent);z-index:94;pointer-events:none;opacity:0;transform:translate(-50%,-50%)}
+.ripple.go{animation:rip .6s ease-out}
+@keyframes rip{0%{opacity:.95;transform:translate(-50%,-50%) scale(.25)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
+.dcap{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(8px);z-index:93;background:rgba(11,11,15,.84);backdrop-filter:blur(14px);border:1px solid var(--border-strong);border-radius:999px;padding:12px 24px;font-size:14.5px;font-weight:600;color:#fff;opacity:0;transition:opacity .45s,transform .45s;max-width:84vw;text-align:center}
+.dcap.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.dstart{position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:rgba(8,8,11,.9);cursor:pointer}
+.dstart .pp{width:82px;height:82px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);box-shadow:0 0 60px rgba(16,185,129,.55);transition:transform .2s}
+.dstart:hover .pp{transform:scale(1.06)}
+.dstart .ll{position:absolute;bottom:30vh;color:var(--muted);font-weight:600;font-size:14.5px;letter-spacing:.01em}
+.dstart .brand2{position:absolute;top:34px;font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px}
+.dstart .brand2 .m2{width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><span class="mk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></span> JobPilot</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <div class="credit">
+        <div class="top"><span>AI credits</span><span><b class="tnum" id="credN">780</b> / 1,000</span></div>
+        <div class="track"><div class="fill" id="credBar" style="width:78%"></div></div>
+      </div>
+      <div class="usr"><div class="av">MO</div><div><div class="nm">Maya Okonkwo</div><div class="em">maya@okonkwo.dev</div></div></div>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <h1 id="title">Job pipeline</h1>
+      <button class="search" onclick="openCmd()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="Search jobs, applications…" readonly><span class="kbd">⌘K</span></button>
+      <button class="iconbtn" title="Notifications"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+    </header>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer"></aside>
+<div class="cmd" id="cmd" onclick="if(event.target.id==='cmd')closeCmd()">
+  <div class="cmdbox"><input id="cmdInput" placeholder="Type a command or search…" oninput="renderCmd()" onkeydown="cmdKey(event)"><div class="cmdlist" id="cmdList"></div></div>
+</div>
+<div class="toasts" id="toasts"></div>
+<div class="cursor" id="cur"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff" stroke="#0b0b0f" stroke-width="1.2" stroke-linejoin="round"><path d="M5 3l14 6.5-6 1.8-1.8 6z"/></svg></div>
+<div class="ripple" id="rip"></div>
+<div class="dcap" id="dcap"></div>
+<div class="dstart" id="dstart">
+  <div class="brand2"><span class="m2"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></span> JobPilot</div>
+  <div class="pp"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+  <div class="ll">▶ Play the 30-second product tour</div>
+</div>
+<script>
+const JOBS=[
+  {id:1,score:94,title:"Senior Full-Stack Engineer",co:"Vercel",loc:"Remote · Global",src:"Greenhouse",best:true,desc:"Own end-to-end product surfaces in Next.js + TypeScript. Ship to millions of developers. Care about DX, performance, and craft.",need:["Next.js","TypeScript","React","PostgreSQL","Edge functions","Design systems"]},
+  {id:2,score:88,title:"Frontend Engineer, Design Systems",co:"Linear",loc:"Remote · EU",src:"Ashby",best:true,desc:"Build the component library and primitives the whole product is made of. Obsessive about motion, accessibility, and detail.",need:["React","TypeScript","CSS architecture","Accessibility","Storybook"]},
+  {id:3,score:81,title:"Product Engineer",co:"Stripe",loc:"Remote · US",src:"Greenhouse",desc:"Full-stack product work across payments surfaces. Comfortable in ambiguity, strong on fundamentals.",need:["TypeScript","React","Ruby","API design","Postgres"]},
+  {id:4,score:72,title:"React Engineer",co:"Retool",loc:"SF / Remote",src:"Lever",desc:"Build the visual app builder used by 10k+ teams. Heavy frontend, performance-sensitive canvas work.",need:["React","TypeScript","Canvas/WebGL","State management"]},
+  {id:5,score:64,title:"Full-Stack Developer (Go)",co:"Railway",loc:"Anywhere",src:"Greenhouse",desc:"Infra-adjacent product work. Backend in Go, frontend in React. You like systems.",need:["Go","React","Docker","Distributed systems"]},
+];
+const MY_SKILLS=["React","Next.js","TypeScript","PostgreSQL","Design systems","Accessibility","Node.js","Tailwind","Storybook"];
+const HAVE=new Set(MY_SKILLS.map(s=>s.toLowerCase()));
+const STEPS=[{t:"Researcher",d:"Studies the company"},{t:"Resume Tailor",d:"Maps your real skills"},{t:"Email Writer",d:"Drafts a personalized email"},{t:"QA Checker",d:"Scores spam + quality"}];
+let credits=780, selId=null, view="jobs", loading=true;
+const I={jobs:'<path d="M3 7h18v12H3z"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',apps:'<path d="m22 2-7 20-4-9-9-4Z"/>',resume:'<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/>',chart:'<path d="M3 3v18h18"/><path d="m7 14 3-3 3 3 5-5"/>',settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.91 1.16V22a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 7 20.18a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 2.6 15H2a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6V4a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.91 1.16l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9H22a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 2Z"/>',zap:'<path d="M4 14h7l-1 8 10-12h-7l1-8z"/>'};
+const NAV=[{k:"jobs",l:"Jobs",badge:5},{k:"apps",l:"Applications"},{k:"resume",l:"Resumes"},{k:"chart",l:"Analytics"},{k:"settings",l:"Settings"}];
+const TITLES={jobs:"Job pipeline",apps:"Applications",resume:"Resumes",chart:"Analytics",settings:"Settings"};
+function svg(p,s=17){return `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`}
+function renderNav(){document.getElementById('nav').innerHTML=NAV.map(n=>`<button class="${view===n.k?'on':''}" onclick="go('${n.k}')">${svg(I[n.k])}<span>${n.l}</span>${n.badge?`<span class="badge tnum">${n.badge}</span>`:''}</button>`).join('')}
+function go(v){view=v;document.getElementById('title').textContent=TITLES[v];renderNav();render()}
+function scoreClass(s){return s>=85?'hi':s>=70?'mid':'lo'}
+function render(){
+  const c=document.getElementById('content');
+  if(view!=='jobs'){c.innerHTML=`<div class="empty fade"><div class="big">${svg(I[view],24)}</div><h3>${TITLES[view]}</h3><p>Part of the full product. This interactive demo focuses on the core — the job pipeline and the 4-agent apply flow. Press <span class="kbd">⌘K</span> to jump anywhere.</p><button class="btn" style="margin-top:18px" onclick="go('jobs')">Back to Job pipeline</button></div>`;return}
+  if(loading){c.innerHTML=`<div class="head"><div><div class="h2">Job pipeline</div><div class="sub">Finding matches…</div></div></div>`+Array.from({length:4}).map(()=>`<div class="skjob"><div class="sk" style="width:46px;height:46px;border-radius:12px"></div><div style="flex:1"><div class="sk" style="height:14px;width:40%;margin-bottom:8px"></div><div class="sk" style="height:11px;width:25%"></div></div></div>`).join('');return}
+  c.innerHTML=`<div class="head fade"><div><div class="h2">Job pipeline</div><div class="sub">${JOBS.length} new matches · scored against your profile</div></div><button class="btn ghost" onclick="toast('Scanning 8 sources…')">${svg(I.zap,15)} Find new jobs</button></div><div class="jobs">${JOBS.map(j=>`<div class="job fade ${selId===j.id?'sel':''}" onclick="openJob(${j.id})"><div class="score ${scoreClass(j.score)}"><span class="tnum">${j.score}</span></div><div class="meta"><div class="t">${j.title}</div><div class="s">${j.co} · ${j.loc}</div></div>${j.best?'<span class="chip best">Best fit</span>':''}<span class="chip src">${j.src}</span></div>`).join('')}</div>`;
+}
+function openJob(id){
+  selId=id;render();const j=JOBS.find(x=>x.id===id);
+  const tags=j.need.map(n=>`<span class="tag ${HAVE.has(n.toLowerCase())?'have':''}">${n}</span>`).join('');
+  const cost=Math.max(8,Math.round(j.desc.length/90));
+  document.getElementById('drawer').innerHTML=`<div class="dh"><div class="score ${scoreClass(j.score)}" style="width:42px;height:42px"><span class="tnum">${j.score}</span></div><div><div style="font-weight:700;font-size:16px;letter-spacing:-.01em">${j.title}</div><div style="color:var(--muted);font-size:13px;margin-top:2px">${j.co} · ${j.loc}</div></div><button class="x iconbtn" onclick="closeDrawer()">${svg('<path d="M18 6 6 18M6 6l12 12"/>',16)}</button></div><div class="db" id="drawerBody"><div class="kv"><span class="k">Match</span><b>${j.score}/100</b> — strong overlap with your profile</div><div class="kv"><span class="k">Source</span>${j.src}</div><p style="color:#c8c8d0;font-size:13.5px;line-height:1.6;margin-top:12px">${j.desc}</p><div class="sectionlabel">Required skills · <span style="color:var(--accent)">${j.need.filter(n=>HAVE.has(n.toLowerCase())).length}/${j.need.length} you have</span></div><div>${tags}</div></div><div class="df"><button class="btn" id="applyBtn" onclick="runApply(${j.id},${cost})">${svg(I.zap,15)} Apply with AI · <span class="tnum">${cost}</span> credits</button><button class="btn ghost" onclick="closeDrawer()">Dismiss</button></div>`;
+  document.getElementById('drawer').classList.add('on');document.getElementById('scrim').classList.add('on');
+}
+function closeDrawer(){document.getElementById('drawer').classList.remove('on');document.getElementById('scrim').classList.remove('on');selId=null;render()}
+function runApply(id,cost){
+  const j=JOBS.find(x=>x.id===id);
+  if(credits<cost){toast('Not enough credits — upgrade to continue',true);return}
+  document.getElementById('applyBtn').disabled=true;
+  const body=document.getElementById('drawerBody');
+  body.innerHTML=`<div class="sectionlabel">Generating your application</div><div class="pipe">${STEPS.map((s,i)=>`<div class="pstep" id="ps${i}"><div class="dot">${i+1}</div><div><div class="pt">${s.t}</div><div class="pd">${s.d}</div></div><span class="stat" id="pstat${i}">Queued</span></div>`).join('')}</div>`;
+  let i=0;(function next(){if(i>=STEPS.length){finishApply(j,cost);return}const el=document.getElementById('ps'+i),st=document.getElementById('pstat'+i);el.classList.add('run');el.querySelector('.dot').innerHTML='<span class="spin"></span>';st.textContent='Working…';setTimeout(()=>{el.classList.remove('run');el.classList.add('done');el.querySelector('.dot').innerHTML='✓';st.textContent='Done';i++;next()},700+Math.random()*500)})();
+}
+function finishApply(j,cost){
+  credits-=cost;document.getElementById('credN').textContent=credits;document.getElementById('credBar').style.width=(credits/10)+'%';
+  const matched=j.need.filter(n=>HAVE.has(n.toLowerCase())).length;
+  const body=document.getElementById('drawerBody');
+  body.innerHTML+=`<div class="sectionlabel" style="margin-top:22px">Generated email <span style="color:var(--accent)">· audited, no fabrication</span></div><div class="mailcard fade"><div class="mh"><b>Subject:</b> ${j.title} — production React/TS, shipped to real users</div><div class="mb">Hi ${j.co} team,
+
+I'm applying for the ${j.title} role. I've spent the last few years building production React + TypeScript surfaces — design systems, accessible components, and Next.js apps shipped to real users.
+
+What drew me to ${j.co}: your bar for craft and DX is exactly the work I care about. I'd love to show you what I've built.
+
+— Maya</div></div><div class="scorebar fade"><div class="metric"><div class="mv" style="color:var(--accent)">9.1<span style="font-size:13px;color:var(--muted)">/10</span></div><div class="ml">Quality score</div></div><div class="metric"><div class="mv tnum">1.2<span style="font-size:13px;color:var(--muted)">/10</span></div><div class="ml">Spam risk</div></div><div class="metric"><div class="mv tnum">${matched}/${j.need.length}</div><div class="ml">Skills matched</div></div></div>`;
+  body.scrollTop=body.scrollHeight;
+  document.querySelector('.df').innerHTML=`<button class="btn" onclick="toast('Sent from your Gmail ✓')">${svg('<path d="m22 2-11 11"/><path d="M22 2 15 22l-4-9-9-4Z"/>',15)} Send application</button><button class="btn ghost" onclick="toast('Copied to clipboard')">Copy</button><button class="btn ghost" onclick="toast('Settings sent back to composer')">Remix</button>`;
+  toast('Application ready — credits charged only on success');
+}
+const CMDS=[{l:"Go to Job pipeline",h:"Jobs",a:()=>go('jobs')},{l:"View Applications",h:"Apps",a:()=>go('apps')},{l:"Open Analytics",h:"Charts",a:()=>go('chart')},{l:"Apply to top match (Vercel · 94%)",h:"AI",a:()=>{go('jobs');setTimeout(()=>openJob(1),200)}},{l:"Find new jobs",h:"Scan",a:()=>{go('jobs');toast('Scanning 8 sources…')}},{l:"Open Settings",h:"",a:()=>go('settings')}];
+let cmdSel=0;
+function openCmd(){document.getElementById('cmd').classList.add('on');const i=document.getElementById('cmdInput');i.value='';cmdSel=0;renderCmd();setTimeout(()=>i.focus(),30)}
+function closeCmd(){document.getElementById('cmd').classList.remove('on')}
+function filtered(){const q=document.getElementById('cmdInput').value.toLowerCase();return CMDS.filter(c=>c.l.toLowerCase().includes(q))}
+function renderCmd(){cmdSel=0;document.getElementById('cmdList').innerHTML=filtered().map((c,i)=>`<div class="cmdItem ${i===0?'on':''}" onclick="runCmd(${i})">${svg(I.zap,16)}<span>${c.l}</span><span class="hint">${c.h}</span></div>`).join('')||`<div class="cmdItem">No matches</div>`}
+function runCmd(i){const f=filtered()[i];if(f){closeCmd();f.a()}}
+function cmdKey(e){const items=filtered();if(e.key==='ArrowDown'){e.preventDefault();cmdSel=Math.min(items.length-1,cmdSel+1)}else if(e.key==='ArrowUp'){e.preventDefault();cmdSel=Math.max(0,cmdSel-1)}else if(e.key==='Enter'){e.preventDefault();runCmd(cmdSel)}else if(e.key==='Escape'){closeCmd()}else return;[...document.querySelectorAll('.cmdItem')].forEach((el,i)=>el.classList.toggle('on',i===cmdSel))}
+window.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openCmd()}if(e.key==='Escape'){closeDrawer()}});
+function toast(msg,danger){const t=document.createElement('div');t.className='toast';t.innerHTML=`<span class="tk" style="${danger?'background:var(--danger)':''}"></span>${msg}`;document.getElementById('toasts').appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},2600)}
+/* ───────── AUTO-DIRECTOR: a guided walkthrough that USES the product ───────── */
+const cur=document.getElementById('cur'), rip=document.getElementById('rip'), dcap=document.getElementById('dcap');
+let curX=innerWidth/2, curY=innerHeight*0.55;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function place(){cur.style.transform=`translate(${curX-3}px,${curY-3}px)`}
+function moveTo(el){return new Promise(res=>{if(!el)return res();const r=el.getBoundingClientRect();curX=r.left+r.width*0.5;curY=r.top+r.height*0.5;place();setTimeout(res,880)})}
+function ripple(){rip.style.left=curX+'px';rip.style.top=curY+'px';rip.classList.remove('go');void rip.offsetWidth;rip.classList.add('go')}
+async function tap(el){await moveTo(el);if(!el)return;ripple();await wait(230);el.click()}
+function cap(t){try{parent.postMessage({type:'cap',tx:t},'*')}catch(e){}}
+const capOff=()=>{try{parent.postMessage({type:'cap',tx:''},'*')}catch(e){}};
+
+async function direct(){
+  // reset
+  credits=780;document.getElementById('credN').textContent=780;document.getElementById('credBar').style.width='78%';
+  view='jobs';loading=true;selId=null;closeDrawer();renderNav();render();
+  curX=innerWidth/2;curY=innerHeight*0.55;place();cur.style.opacity='1';
+  await wait(1300);loading=false;render();await wait(600);
+  cap('Find roles that actually fit — every job scored 0–100.');
+  await wait(1900);
+  await tap(document.querySelector('.job'));        // open a job
+  await wait(1200);
+  cap('JobPilot maps each role to your real skills.');
+  await wait(1900);
+  await tap(document.getElementById('applyBtn'));    // run the 4-agent pipeline
+  cap('Four AI agents research, tailor, write and QA your application.');
+  await wait(5400);
+  cap('Tailored to the role — and audited so nothing is fabricated.');
+  await wait(2800);
+  await tap(document.querySelector('.df .btn'));      // send
+  cap('Then apply in one click — from your own inbox.');
+  await wait(2800);
+  capOff();await wait(700);
+  try{parent.postMessage({type:'end'},'*')}catch(e){}
+  await wait(2400);
+  direct();                                           // loop
+}
+// inner reel: no gate, auto-start; the studio frame controls presentation
+const _g=document.getElementById('dstart');if(_g)_g.style.display='none';
+const _d=document.getElementById('dcap');if(_d)_d.style.display='none';
+loading=false;renderNav();render();
+setTimeout(()=>direct(),500);
+</script>
+</body></html>

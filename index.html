@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JobPilot — product film</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#10b981}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#06060a;font-family:'Sora',system-ui,sans-serif;color:#fff}
+.stage{position:fixed;inset:0;display:grid;place-items:center;
+  background:radial-gradient(120% 80% at 50% -10%, rgba(16,185,129,.16), transparent 55%),
+             radial-gradient(90% 70% at 90% 110%, rgba(99,102,241,.10), transparent 55%),
+             linear-gradient(180deg,#0b0b12,#06060a)}
+.stage::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(circle at 50% 40%,#000 20%,transparent 72%)}
+.bars{position:absolute;left:0;right:0;height:5vh;background:#000;z-index:8;pointer-events:none}.bars.t{top:0}.bars.b{bottom:0}
+
+/* browser frame */
+#frame{position:relative;z-index:3;border-radius:14px;overflow:hidden;background:#0e0e13;
+  border:1px solid rgba(255,255,255,.09);box-shadow:0 40px 120px rgba(0,0,0,.6),0 8px 30px rgba(0,0,0,.5);
+  animation:drift 14s ease-in-out infinite alternate;opacity:0;transform:translateY(24px) scale(.97);transition:opacity 1s,transform 1.2s cubic-bezier(.2,0,0,1)}
+#frame.in{opacity:1;transform:none}
+@keyframes drift{from{transform:translateY(0) scale(1)}to{transform:translateY(-10px) scale(1.012)}}
+#scaler{transform-origin:0 0}
+.chrome{height:38px;width:1280px;background:#101016;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;padding:0 14px}
+.chrome .dots{display:flex;gap:7px}.chrome .dots i{width:11px;height:11px;border-radius:50%;display:block}
+.chrome .dots i:nth-child(1){background:#ff5f57}.chrome .dots i:nth-child(2){background:#febc2e}.chrome .dots i:nth-child(3){background:#28c840}
+.chrome .url{margin:0 auto;background:#1c1c24;border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:5px 16px;font-size:12.5px;color:#9aa0a6;display:flex;align-items:center;gap:7px}
+.chrome .url svg{opacity:.7}
+iframe{width:1280px;height:800px;border:0;display:block;background:#0B0B0F;pointer-events:none}
+
+/* captions on the stage */
+.cap{position:absolute;bottom:7vh;left:0;right:0;z-index:7;text-align:center;padding:0 8vw;opacity:0;transform:translateY(16px);filter:blur(7px);transition:opacity .5s,transform .6s cubic-bezier(.2,0,0,1),filter .6s}
+.cap.on{opacity:1;transform:none;filter:none}
+.cap .tx{font-size:clamp(20px,2.6vw,34px);font-weight:700;letter-spacing:-.015em;max-width:24ch;margin:0 auto;line-height:1.15}
+
+/* intro / outro / gate */
+.veil{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:#06060a;transition:opacity .8s;text-align:center}
+.veil.hide{opacity:0;pointer-events:none}
+.lk{font-size:clamp(40px,8vw,104px);font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:.2em}
+.lk .mk{width:.74em;height:.74em;border-radius:.2em;background:var(--accent);display:grid;place-items:center;color:#06231a}
+.veil .sub{position:absolute;bottom:30vh;color:#9aa0a6;font-weight:600;font-size:clamp(14px,1.7vw,20px)}
+.intro .lk{animation:pop 1s both}@keyframes pop{0%{opacity:0;transform:scale(.93);filter:blur(8px)}40%{opacity:1;transform:none;filter:none}}
+
+#outro{z-index:18;background:rgba(6,6,10,.86);backdrop-filter:blur(6px);opacity:0;pointer-events:none}
+#outro.on{opacity:1}
+#outro .h{font-size:clamp(28px,4.5vw,58px);font-weight:800;letter-spacing:-.02em}
+#outro .btn{margin-top:24px;display:inline-flex;align-items:center;gap:.5em;background:var(--accent);color:#06231a;font-weight:700;padding:.7em 1.5em;border-radius:999px;font-size:clamp(15px,1.7vw,20px)}
+
+#gate{z-index:30;cursor:pointer}
+#gate .pp{width:84px;height:84px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#06231a;box-shadow:0 0 60px rgba(16,185,129,.5);transition:transform .2s}
+#gate:hover .pp{transform:scale(1.07)}
+#gate .ll{position:absolute;bottom:30vh;color:#9aa0a6;font-weight:600}
+.mark{position:absolute;bottom:14px;left:22px;z-index:9;font-size:12.5px;color:#7c828a;font-weight:600}.mark b{color:#cfd2d6}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div id="frame"><div id="scaler">
+    <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>job-auto-applier-three.vercel.app</span></div>
+    <iframe id="reel" title="JobPilot demo"></iframe>
+  </div></div>
+  <div class="bars t"></div><div class="bars b"></div>
+  <div class="cap" id="cap"><div class="tx" id="capTx"></div></div>
+  <div class="mark"><b>JobPilot</b> · live product</div>
+
+  <div class="veil intro hide" id="intro"><div class="lk"><span class="mk"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></span>JobPilot</div><div class="sub">Apply to jobs the way you would — only faster.</div></div>
+
+  <div class="veil" id="outro"><div><div class="h">Apply like you mean it.</div><div><span class="btn">job-auto-applier-three.vercel.app →</span></div></div></div>
+
+  <div class="veil" id="gate"><div class="pp"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div class="ll">▶ Play the product film &nbsp;·&nbsp; ~30s</div></div>
+</div>
+
+<script>
+const FW=1280,FH=800,CH=38;
+const frame=document.getElementById('frame'),scaler=document.getElementById('scaler');
+function fit(){const s=Math.min((innerWidth*0.84)/FW,(innerHeight*0.82)/(FH+CH));frame.style.width=(FW*s)+'px';frame.style.height=((FH+CH)*s)+'px';scaler.style.transform='scale('+s+')'}
+addEventListener('resize',fit);fit();
+
+const capEl=document.getElementById('cap'),capTx=document.getElementById('capTx');
+window.addEventListener('message',e=>{
+  const d=e.data||{};
+  if(d.type==='cap'){ if(d.tx){capTx.textContent=d.tx;capEl.classList.add('on')} else {capEl.classList.remove('on')} }
+  if(d.type==='end'){ const o=document.getElementById('outro');o.classList.add('on');capEl.classList.remove('on');setTimeout(()=>o.classList.remove('on'),2300) }
+});
+
+function play(){
+  document.getElementById('gate').classList.add('hide');
+  const intro=document.getElementById('intro');intro.classList.remove('hide');
+  document.getElementById('reel').src='walkthrough.html';   // loads + auto-starts inside
+  setTimeout(()=>{intro.classList.add('hide')},2600);
+  setTimeout(()=>{frame.classList.add('in')},2100);
+}
+document.getElementById('gate').onclick=play;
+</script>
+</body></html>
