@@ -23,12 +23,11 @@ An AI co-pilot that scrapes 8 job boards, scores every role against your real pr
 
 ## 🎬 Demo
 
-> Open [`index.html`](./index.html) for the animated product reel (auto-plays, has a 9:16 vertical mode), or watch the live app below.
+https://github.com/user-attachments/assets/a8f6cb61-63e9-447f-b856-ad93fac71703
 
-**▶ Live:** **https://job-auto-applier-three.vercel.app**
+> ▶ Also runs live as an interactive film → **[gitmuhammadali.github.io/jobpilot-demo](https://gitmuhammadali.github.io/jobpilot-demo/)**
 
-<!-- Drop a recorded GIF/MP4 of the live product here for the strongest first impression:
-![JobPilot demo](./assets/demo.gif) -->
+**▶ Live app:** **https://job-auto-applier-three.vercel.app**
 
 ---
 
