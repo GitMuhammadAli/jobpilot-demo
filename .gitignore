@@ -1,3 +1,6 @@
 assets/*.mp4
+assets/*.webm
 assets/rec/
+assets/realrec/
+assets/realtour/
 node_modules/
