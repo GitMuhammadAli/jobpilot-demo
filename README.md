@@ -23,7 +23,7 @@ An AI co-pilot that scrapes 8 job boards, scores every role against your real pr
 
 ## 🎬 Demo
 
-https://github.com/user-attachments/assets/f7391bf3-a2ee-4000-9e52-9b523713dcb4
+https://github.com/user-attachments/assets/2b459d69-979c-48f7-b99b-f8ea159e2d8b
 
 > A narrated 30-second tour of the **live product**. ▶ Also runs as an interactive film → **[gitmuhammadali.github.io/jobpilot-demo](https://gitmuhammadali.github.io/jobpilot-demo/)**
 
