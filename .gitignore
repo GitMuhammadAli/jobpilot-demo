@@ -1,6 +1,14 @@
+# Node deps
+node_modules/
+
+# Generated demo + promo assets — the rendered videos are hosted on GitHub
+# user-attachments (referenced by URL in the README), never committed to the repo.
 assets/*.mp4
 assets/*.webm
+assets/*.aiff
+assets/*.png
 assets/rec/
 assets/realrec/
 assets/realtour/
-node_modules/
+assets/promo-rec/
+assets/signup/
